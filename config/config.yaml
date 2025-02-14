@@ -1,0 +1,11 @@
+db_config:
+  host: localhost
+  port: 5432
+  database: analysis-example
+  user: postgres
+  password: mysecretpassword
+
+paths:
+  raw_data_path: data/raw/mortality_rate.csv
+  cleaned_data_path: data/cleaned/mortality_rate.csv
+  log_path: logs/project.log
