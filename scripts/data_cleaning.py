@@ -34,28 +34,25 @@ def sanitize_column_name(column_name: str) -> str:
     return column_name
 
 
-def clean_data(raw_path: str, cleaned_path: str) -> None:
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Read raw data, clean it, and save the cleaned data to a new file.
+    Clean the provided DataFrame by:
+      - Dropping rows with missing values
+      - Sanitizing column names
 
-    :param raw_path: Path to the CSV file containing raw data
-    :param cleaned_path: Path where the cleaned CSV file will be saved
-    :raises Exception: If any errors occur during data loading, cleaning, or saving
+    :param df: DataFrame containing raw data
+    :return: Cleaned DataFrame
+    :raises Exception: If any errors occur during data cleaning
     """
     try:
-        # Load raw data
-        df = pd.read_csv(raw_path)
-        logger.info(f"Raw data loaded from '{raw_path}'. Shape: {df.shape}")
-
         # Drop rows with missing values
         df.dropna(inplace=True)
 
         # Sanitize column names
         df.columns = [sanitize_column_name(col) for col in df.columns]
 
-        # Save cleaned data
-        df.to_csv(cleaned_path, index=False)
-        logger.info(f"Cleaned data saved to '{cleaned_path}'. Shape: {df.shape}")
+        logger.info(f"Data cleaned. Shape: {df.shape}")
+        return df
 
     except Exception as e:
         logger.error(f"Error in clean_data: {e}")
