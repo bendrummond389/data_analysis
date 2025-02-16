@@ -1,11 +1,19 @@
+import os
 import logging
 import yaml
 
-def load_config(config_file='config/config.yaml'):
-    with open(config_file, 'r') as file:
+def get_project_root():
+    """Returns the absolute path to the project root directory."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+def load_config():
+    """Loads the configuration file from the project root."""
+    config_path = os.path.join(get_project_root(), 'config/config.yaml')
+    with open(config_path, 'r') as file:
         return yaml.safe_load(file)
 
 def setup_logging(log_path):
+    """Sets up logging with the specified log file path."""
     logging.basicConfig(
         filename=log_path,
         level=logging.INFO,

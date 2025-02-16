@@ -28,7 +28,7 @@ def create_db_engine() -> Engine:
     :raises Exception: If any error occurs while creating the engine.
     """
     try:
-        db_config = load_config("../config/config.yaml")["db_config"]
+        db_config = load_config()["db_config"]
         connection_string = (
             f"postgresql://{db_config['user']}:{db_config['password']}@"
             f"{db_config['host']}:{db_config['port']}/{db_config['database']}"
