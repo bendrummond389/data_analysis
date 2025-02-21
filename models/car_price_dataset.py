@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, BigInteger, Float
 from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from models.base import Base
 
 class CarPriceDataset(Base):
     __tablename__ = 'car_price_dataset'
