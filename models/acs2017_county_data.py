@@ -1,8 +1,9 @@
 from sqlalchemy import Column, BigInteger, Float, ForeignKey
 from .base import Base
 
+
 class ACS2017CountyData(Base):
-    __tablename__ = 'acs2017_county_data'
+    __tablename__ = "acs2017_county_data"
 
     id = Column(BigInteger, primary_key=True)
     totalpop = Column(BigInteger)
@@ -39,4 +40,4 @@ class ACS2017CountyData(Base):
     selfemployed = Column(Float)
     familywork = Column(Float)
     unemployment = Column(Float)
-    fips_code = Column(BigInteger, ForeignKey('fips.fips_code'))
+    fips_code = Column(BigInteger, ForeignKey("fips.fips_code"))

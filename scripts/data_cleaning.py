@@ -21,15 +21,15 @@ def sanitize_column_name(column_name: str) -> str:
     column_name = column_name.lower().strip()
 
     # Replace spaces and certain special characters with underscores
-    column_name = re.sub(r'[\s/\-.,]+', '_', column_name)
+    column_name = re.sub(r"[\s/\-.,]+", "_", column_name)
 
     # Remove any remaining non-alphanumeric characters (except underscores)
-    column_name = re.sub(r'[^a-z0-9_]', '', column_name)
+    column_name = re.sub(r"[^a-z0-9_]", "", column_name)
 
     # Ensure the column name is a valid Python identifier
     if not column_name.isidentifier():
         # If not, prepend an underscore
-        column_name = '_' + column_name
+        column_name = "_" + column_name
 
     return column_name
 

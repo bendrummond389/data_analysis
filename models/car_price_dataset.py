@@ -2,9 +2,10 @@ from sqlalchemy import Column, String, BigInteger, Float
 from sqlalchemy.ext.declarative import declarative_base
 from models.base import Base
 
+
 class CarPriceDataset(Base):
-    __tablename__ = 'car_price_dataset'
-    
+    __tablename__ = "car_price_dataset"
+
     brand = Column(String, primary_key=True)
     model = Column(String, primary_key=True)
     year = Column(BigInteger)

@@ -55,10 +55,8 @@ def get_session() -> Session:
         logger.error(f"Failed to create database session: {e}")
         raise
 
-def load_data_to_db(
-    df: pd.DataFrame,
-    table_name: str
-) -> None:
+
+def load_data_to_db(df: pd.DataFrame, table_name: str) -> None:
     """
     Load cleaned data from a Pandas DataFrame into a PostgreSQL database table.
 
