@@ -3,7 +3,7 @@ data/*
 Pipfile.lock
 /data_analysis.egg-info
 notebooks/modeling/.DS_Store
-competitions/*
+projects/*
 .DS_Store
 *.pyc
 src/config/__pycache__/__init__.cpython-313.pyc

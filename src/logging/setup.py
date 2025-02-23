@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def setup_logger(
-    name: str, log_file: str = "logs/examples.log", level=logging.INFO
+    name: str, log_file: str, level=logging.INFO
 ) -> logging.Logger:
     """
     Creates and returns a logger with a given name and file.

@@ -3,7 +3,6 @@ from .config import (
     find_nearest_config,
     create_symlink,
     find_project_root,
-    find_competition_root,
 )
 from .data import clean_data
 from .database import DatabaseManager
@@ -17,5 +16,4 @@ __all__ = [
     "clean_data",
     "Base",
     "find_project_root",
-    "find_competition_root",
 ]

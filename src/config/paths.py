@@ -87,7 +87,7 @@ def create_symlink(source: Path, target: Path):
     print(f"Symlink created: {target} -> {source}")
 
 
-def find_competition_root(
+def find_project_root(
     start_path: Optional[Path] = None,
     search_depth: int = 5,
 ) -> Path:
@@ -124,8 +124,8 @@ def find_competition_root(
     current_path = start_path
 
     for _ in range(search_depth):
-        # Check if the parent folder is 'competitions'
-        if current_path.parent.name == "competitions":
+        # Check if the parent folder is 'projects'
+        if current_path.parent.name == "projects":
             return current_path.resolve()
 
         # Climb up one level

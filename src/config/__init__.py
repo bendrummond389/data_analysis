@@ -3,7 +3,7 @@ from .paths import (
     find_nearest_config,
     create_symlink,
     find_project_root,
-    find_competition_root,
+    find_project_root,
 )
 
 __all__ = [
@@ -11,5 +11,5 @@ __all__ = [
     "find_nearest_config",
     "create_symlink",
     "find_project_root",
-    "find_competition_root",
+    "find_project_root",
 ]

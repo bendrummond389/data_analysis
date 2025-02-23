@@ -124,6 +124,9 @@ websocket-client = "==1.8.0"
 data-analysis = {file = ".", editable = true}
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.13"
