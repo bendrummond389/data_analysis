@@ -1,60 +1,118 @@
-from typing import List, Type, Iterator, Dict
+# Standard library
 import contextlib
-import pandas as pd
-from sqlalchemy import create_engine, URL
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import sessionmaker, Session, DeclarativeMeta
+import logging
 from pathlib import Path
+from typing import Dict, Iterator, List, Type
+
+# Third-party
+import pandas as pd
 import yaml
+from sqlalchemy import URL, create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import DeclarativeMeta, Session, sessionmaker
 
-from src.config.paths import (
-    find_project_root,
-    find_nearest_config,
-    find_project_root,
-)
-from src.logging.setup import setup_logger
-
-# Initialize a logger for database operations
-# _logger = setup_logger(
-#     "database_manager_init", find_project_root() / "logs/database.log"
-# )
+# Project modules
+from src.logging.logging import AppLogger
 
 
 class DatabaseManager:
-    """Handles database connections, table creation, and data insertion."""
+    """Centralized database connection and operation management.
+    
+    Features:
+    - Dynamic engine configuration
+    - Transactional session management
+    - ORM integration
+    - Bulk data operations
+    - Connection pooling
+    - Configurable logging
 
-    def __init__(self, config: dict = None, config_path: Path = None):
+    Usage:
+    >>> logger = AppLogger(...)
+    >>> db = DatabaseManager.from_yaml(Path("config/db.yaml"), logger)
+    >>> with db.session_scope() as session:
+    ...     session.query(User).all()
+    """
+
+    # --------------------------
+    # Initialization & Configuration
+    # --------------------------
+
+    def __init__(self, config: Dict, logger: AppLogger) -> None:
         self.config = config
-        self.config_path = config_path 
-        self._configure_logger()
-        self.engine = None
-        self.SessionLocal = None
+        self.logger = logger
+        self._engine = None
 
-
-    def _configure_logger(self) -> None:
-        """Configure instance logger based on config settings."""
-        logging_config = self.config.get("logging", {})
-        relative_log_path = logging_config.get("path", "logs/database.log")
-        logger_name = logging_config.get("name", "database_manager")
-
-        # Find project root based on config location or current directory
-        start_path = self.config_path.parent if self.config_path else Path.cwd()
-        base_path = find_project_root(start_path)
+    @classmethod
+    def from_yaml(cls, config_path: Path, logger: AppLogger) -> "DatabaseManager":
+        """Create instance from YAML configuration file.
         
-        log_path = base_path / relative_log_path
-        self.logger = setup_logger(logger_name, log_path)
-        self.logger.info(f"Logger configured with path: {log_path}")
+        Args:
+            config_path: Path to YAML configuration file
+            logger: Preconfigured application logger
+        """
+        return cls(
+            config=cls._load_yaml_config(config_path),
+            logger=logger
+        )
 
-    def _load_config(self) -> dict:
-        """Load database configuration from YAML file."""
+    # --------------------------
+    # Core Engine Configuration
+    # --------------------------
+
+    @staticmethod
+    def _load_yaml_config(config_path: Path) -> Dict:
+        """Load and validate database configuration from YAML."""
         try:
-            with open(self.config_path) as f:
-                config = yaml.safe_load(f)
-            return config
+            with config_path.open("r") as f:
+                return yaml.safe_load(f) or {}
+        except (FileNotFoundError, yaml.YAMLError) as e:
+            raise ValueError(f"Failed to load database config: {e}") from e
+
+    @property
+    def engine(self):
+        """Lazy-loaded SQLAlchemy engine instance."""
+        if self._engine is None:
+            self._engine = self._create_engine()
+        return self._engine
+
+    def _create_engine(self):
+        """Construct and validate SQLAlchemy engine with connection pooling."""
+        db_config = self.config.get("database", self._default_db_config())
+        self._validate_db_config(db_config)
+
+        engine = create_engine(
+            self._build_connection_url(db_config),
+            pool_size=10,
+            max_overflow=2,
+            pool_recycle=300
+        )
+        
+        self._test_connection(engine)
+        self.logger.info(f"Engine initialized: {engine}")
+        return engine
+
+    def _test_connection(self, engine) -> None:
+        """Validate database connectivity."""
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+
+    # --------------------------
+    # Configuration Helpers
+    # --------------------------
+
+    def validate_connection(self) -> None:
+        """Public method to verify active database connection."""
+        try:
+            if self.engine is None:
+                raise RuntimeError("Database engine not initialized")
+            self.logger.info("Database connection validated")
         except Exception as e:
+            self.logger.exception("Connection validation failed")
             raise
 
-    def _load_default_config(self):
+    @staticmethod
+    def _default_db_config() -> Dict:
+        """Default fallback configuration values."""
         return {
             "host": "localhost",
             "port": 5432,
@@ -62,87 +120,87 @@ class DatabaseManager:
             "user": "postgres",
             "password": ""
         }
-    
+
+    def _validate_db_config(self, config: Dict) -> None:
+        """Ensure required connection parameters exist."""
+        required = {"host", "port", "name", "user", "password"}
+        if missing := required - config.keys():
+            raise ValueError(f"Missing configuration keys: {missing}")
+
     @staticmethod
-    def _load_yaml_config(config_path: Path):
-        try:
-            with open(config_path) as f:
-                return yaml.safe_load(f)
-        except Exception as e:
-            raise
+    def _build_connection_url(config: Dict) -> URL:
+        """Construct PostgreSQL connection URL."""
+        return URL.create(
+            drivername="postgresql",
+            username=config["user"],
+            password=config["password"],
+            host=config["host"],
+            port=config["port"],
+            database=config["name"],
+        )
 
-    def _create_engine(self):
-        """Dynamically create a SQLAlchemy engine using extracted db_config."""
-        required_keys = {"host", "port", "name", "user", "password"}
+    # --------------------------
+    # Session Management
+    # --------------------------
 
-        db_config = self.config.get("database", self._load_default_config())
-        if missing := required_keys - db_config.keys():
-            self.logger.error(f"Missing required config keys: {missing}")
-            raise ValueError(f"Missing required config keys: {missing}")
-
-        try:
-            url = URL.create(
-                drivername="postgresql",
-                username=db_config["user"],
-                password=db_config["password"],
-                host=db_config["host"],
-                port=db_config["port"],
-                database=db_config["name"],
+    @property
+    def SessionLocal(self):
+        """Database session factory."""
+        if not hasattr(self, "_SessionLocal"):
+            # Ensure engine exists before creating session maker
+            engine = self.engine  
+            self._SessionLocal = sessionmaker(
+                autocommit=False,
+                autoflush=False,
+                bind=engine
             )
-            engine = create_engine(url)
-            self.logger.info("Database engine created successfully")
-            return engine
-        except Exception as e:
-            self.logger.exception(f"Engine creation failed: {e}")
-            raise
-
-    @classmethod
-    def from_yaml(cls, config_path: Path):
-        """Alternative constructor for file-based config"""
-        config = cls._load_yaml_config(config_path)
-        return cls(config=config, config_path=config_path)
-
-    def connect(self):
-        """Explicit method for engine creation"""
-        if not self.engine:
-            self.engine = self._create_engine()
-            self.SessionLocal = sessionmaker(
-                autocommit=False, autoflush=False, bind=self.engine
-            )
-
+        return self._SessionLocal
 
     @contextlib.contextmanager
     def session_scope(self) -> Iterator[Session]:
-        """Context manager for transactional database sessions"""
-        if not self.SessionLocal:
-            self.connect()
-        
+        """Transactional session context manager with automatic cleanup."""
         session = self.SessionLocal()
         try:
             yield session
             session.commit()
         except Exception as e:
             session.rollback()
-            self.logger.exception(f"Session rollback due to error: {e}")
+            self.logger.exception("Session rollback due to error")
             raise
         finally:
             session.close()
 
+    # --------------------------
+    # Database Operations
+    # --------------------------
+
     def create_tables(self, models: List[Type[DeclarativeMeta]]) -> None:
-        """Create database tables from ORM models."""
+        """Create database tables from SQLAlchemy models."""
         try:
+            self.logger.info(f"Creating tables for {len(models)} models")
+            
             for model in models:
                 if hasattr(model, "__table__"):
                     model.__table__.create(bind=self.engine, checkfirst=True)
-            self.logger.info("Tables created successfully")
+            
+            self.logger.info(f"Successfully created {len(models)} tables")
         except SQLAlchemyError as e:
-            self.logger.exception(f"Error creating tables: {e}")
+            self.logger.exception("Table creation failed")
             raise
 
     def insert_dataframe(self, df: pd.DataFrame, model: Type[DeclarativeMeta]) -> None:
-        """Insert DataFrame records into the database using bulk insert."""
+        """Bulk insert DataFrame records into database."""
         with self.session_scope() as session:
-            session.bulk_insert_mappings(model, df.to_dict(orient="records"))
-            self.logger.info(f"Inserted {len(df)} records into {model.__tablename__}")
+            session.bulk_insert_mappings(
+                model, 
+                df.to_dict(orient="records")
+            )
+            self.logger.info(
+                f"Inserted {len(df)} records into {model.__tablename__}"
+            )
 
-
+    def dispose(self) -> None:
+        """Clean up engine resources and connections."""
+        if self._engine:
+            self._engine.dispose()
+            self.logger.info("Database engine resources released")

@@ -1,47 +1,74 @@
+# Standard library
 import logging
-import os
 from pathlib import Path
+from typing import Optional
 
 
 def setup_logger(
-    name: str, log_file_path: str, level=logging.INFO
+    name: str, 
+    log_path: str,  
+    level: int = logging.INFO,
+    console_level: Optional[int] = None 
 ) -> logging.Logger:
-    """
-    Creates and returns a logger with a given name and file.
-
+    """Configures and returns a logger with dual file/console output.
+    
+    Features:
+    - Ensures log directory exists
+    - Prevents duplicate handler registration
+    - Separate log levels for file/console
+    - Standardized log formatting
+    
     Args:
-        name (str): Name of the logger (e.g., "database_manager").
-        log_file (str): Log file path.
-        level: Logging level (default: INFO).
-
+        name: Logger namespace identifier (e.g. "data_pipeline")
+        log_path: Output path for log file (str or Path-like)
+        level: Primary logging threshold (default: INFO)
+        console_level: Console-specific level (defaults to level param)
+    
     Returns:
-        logging.Logger: Configured logger instance.
+        Configured Logger instance with file and stream handlers
     """
-    log_path = Path(log_file_path)
-    log_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure log directory exists
+    # --------------------------
+    # Initialization
+    # --------------------------
+    log_file = Path(log_path)
+    console_level = console_level or level 
 
+    # Ensure log directory exists
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # --------------------------
+    # Logger Configuration
+    # --------------------------
     logger = logging.getLogger(name)
-    logger.setLevel(level)
+    logger.setLevel(min(level, console_level)) 
 
-    if not logger.handlers:
-        # File handler
-        file_handler = logging.FileHandler(log_path)
-        file_handler.setLevel(level)
+    # Avoid duplicate handlers in notebook environments
+    if logger.handlers:  
+        return logger
 
-        # Console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)  # Show more details in console
+    # --------------------------
+    # Handler Setup
+    # --------------------------
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(level)
 
-        # Log format
-        log_format = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(console_level)
 
-        file_handler.setFormatter(log_format)
-        console_handler.setFormatter(log_format)
+    # --------------------------
+    # Formatting
+    # --------------------------
+    log_format = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    file_handler.setFormatter(log_format)
+    console_handler.setFormatter(log_format)
 
-        # Add handlers
-        logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
+    # --------------------------
+    # Final Assembly
+    # --------------------------
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
     return logger
