@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
-from scripts.utils import load_config
+from scripts import load_config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
