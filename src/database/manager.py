@@ -25,10 +25,11 @@ class DatabaseManager:
         self.logging_config = self.config.get("logging_config", {})
 
         relative_log_path = self.logging_config.get("log_path", "logs/database.log")
+        logger_name = self.logging_config.get("logger_name", "database.log")
 
         log_path = find_competition_root(self.config_path) / relative_log_path
 
-        self.logger = setup_logger("database_manager", log_path)
+        self.logger = setup_logger(logger_name, log_path)
         self.logger.info(f"Setting log path: {log_path}")
 
         self.logger.info(f"Initialized DatabaseManager with config: {self.config_path}")
