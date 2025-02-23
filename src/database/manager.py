@@ -28,7 +28,7 @@ class DatabaseManager:
 
     Usage:
     >>> logger = AppLogger(...)
-    >>> db = DatabaseManager.from_yaml(Path("config/db.yaml"), logger)
+    >>> db = DatabaseManager.from_yaml(Path("config/config.yaml"), logger)
     >>> with db.session_scope() as session:
     ...     session.query(User).all()
     """
@@ -77,7 +77,7 @@ class DatabaseManager:
 
     def _create_engine(self):
         """Construct and validate SQLAlchemy engine with connection pooling."""
-        db_config = self.config.get("database", self._default_db_config())
+        db_config = self.config.setdefault("database", self._default_db_config())
         self._validate_db_config(db_config)
 
         engine = create_engine(
@@ -86,7 +86,6 @@ class DatabaseManager:
             max_overflow=2,
             pool_recycle=300
         )
-        
         self._test_connection(engine)
         self.logger.info(f"Engine initialized: {engine}")
         return engine
@@ -147,7 +146,6 @@ class DatabaseManager:
     def SessionLocal(self):
         """Database session factory."""
         if not hasattr(self, "_SessionLocal"):
-            # Ensure engine exists before creating session maker
             engine = self.engine  
             self._SessionLocal = sessionmaker(
                 autocommit=False,
@@ -158,17 +156,22 @@ class DatabaseManager:
 
     @contextlib.contextmanager
     def session_scope(self) -> Iterator[Session]:
-        """Transactional session context manager with automatic cleanup."""
+        """Transactional session context manager with granular error handling."""
         session = self.SessionLocal()
         try:
             yield session
             session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            self.logger.error(f"SQLAlchemy Error: {e}")
+            raise
         except Exception as e:
             session.rollback()
-            self.logger.exception("Session rollback due to error")
+            self.logger.exception("Unexpected error, rolling back transaction")
             raise
         finally:
             session.close()
+
 
     # --------------------------
     # Database Operations
@@ -189,18 +192,24 @@ class DatabaseManager:
             raise
 
     def insert_dataframe(self, df: pd.DataFrame, model: Type[DeclarativeMeta]) -> None:
-        """Bulk insert DataFrame records into database."""
+        """Bulk insert DataFrame records into the database with validation."""
+        records = df.to_dict(orient="records")
+        if not records:
+            self.logger.warning(f"No records to insert into {model.__tablename__}")
+            return
+
         with self.session_scope() as session:
-            session.bulk_insert_mappings(
-                model, 
-                df.to_dict(orient="records")
-            )
-            self.logger.info(
-                f"Inserted {len(df)} records into {model.__tablename__}"
-            )
+            try:
+                session.bulk_insert_mappings(model, records)
+                self.logger.info(f"Inserted {len(records)} records into {model.__tablename__}")
+            except SQLAlchemyError as e:
+                session.rollback()
+                self.logger.exception(f"Failed to insert DataFrame into {model.__tablename__}: {e}")
+                raise
 
     def dispose(self) -> None:
         """Clean up engine resources and connections."""
         if self._engine:
             self._engine.dispose()
+            self._engine = None  # Reset to enforce re-creation
             self.logger.info("Database engine resources released")
