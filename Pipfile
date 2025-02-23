@@ -128,3 +128,12 @@ data-analysis = {file = ".", editable = true}
 [requires]
 python_version = "3.13"
 python_full_version = "3.13.1"
+pytest = "*"
+pytest-cov = "*"
+python-dotenv = "*"
+factory-boy = "*"  # For creating test data
+
+[scripts]
+clean = "python scripts/cleanup.py"
+clean-dry = "python scripts/cleanup.py --dry-run"
+clean-all = "bash scripts/clean.sh"

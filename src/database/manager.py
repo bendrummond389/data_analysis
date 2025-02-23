@@ -7,15 +7,22 @@ from sqlalchemy.orm import sessionmaker, Session, DeclarativeMeta
 from pathlib import Path
 import yaml
 
-from src.config.paths import find_competition_root, find_nearest_config, find_project_root
-from src.logging.setup import setup_logger  
+from src.config.paths import (
+    find_competition_root,
+    find_nearest_config,
+    find_project_root,
+)
+from src.logging.setup import setup_logger
 
 # Initialize a logger for database operations
-_logger = setup_logger("database_manager_init", find_project_root() / "logs/database.log")
+_logger = setup_logger(
+    "database_manager_init", find_project_root() / "logs/database.log"
+)
+
 
 class DatabaseManager:
     """Handles database connections, table creation, and data insertion."""
-    
+
     def __init__(self, config_name: str = "database.yaml", context_path: Path = None):
         self.config_path = find_nearest_config(
             start_path=context_path, config_name=config_name
@@ -100,25 +107,5 @@ class DatabaseManager:
     def insert_dataframe(self, df: pd.DataFrame, model: Type[DeclarativeMeta]) -> None:
         """Insert DataFrame records into the database using bulk insert."""
         with self.session_scope() as session:
-            session.bulk_insert_mappings(
-                model, df.to_dict(orient="records")
-            )
-            self.logger.info(
-                f"Inserted {len(df)} records into {model.__tablename__}"
-            )
-
-    def with_db_session(self, func):
-        """Decorator to manage database sessions."""
-        def wrapper(*args, **kwargs):
-            session = self.get_session()
-            try:
-                result = func(session, *args, **kwargs)
-                session.commit()
-                return result
-            except Exception as e:
-                session.rollback()
-                self.logger.exception(f"Transaction failed: {e}")
-                raise
-            finally:
-                session.close()
-        return wrapper
+            session.bulk_insert_mappings(model, df.to_dict(orient="records"))
+            self.logger.info(f"Inserted {len(df)} records into {model.__tablename__}")

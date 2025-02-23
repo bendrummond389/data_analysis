@@ -1,4 +1,3 @@
-
 import re
 import pandas as pd
 from typing import Dict, Any
@@ -42,15 +41,15 @@ def clean_data(df: pd.DataFrame, cleaning_config: Dict[str, Any]) -> pd.DataFram
         # Apply column name sanitization
         if cleaning_config.get("sanitize_columns", True):
             df.columns = [sanitize_column_name(col) for col in df.columns]
-        
+
         # Handle missing values
         if cleaning_config.get("drop_na", True):
             df.dropna(inplace=True)
-        
+
         # Additional cleaning steps
         if cleaning_config.get("strip_strings", True):
             df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
         return df
-        
+
     except Exception as e:
         raise

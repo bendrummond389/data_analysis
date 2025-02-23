@@ -2,10 +2,13 @@ import logging
 import os
 from pathlib import Path
 
-def setup_logger(name: str, log_file: str = "logs/examples.log", level=logging.INFO) -> logging.Logger:
+
+def setup_logger(
+    name: str, log_file: str = "logs/examples.log", level=logging.INFO
+) -> logging.Logger:
     """
     Creates and returns a logger with a given name and file.
-    
+
     Args:
         name (str): Name of the logger (e.g., "database_manager").
         log_file (str): Log file path.
