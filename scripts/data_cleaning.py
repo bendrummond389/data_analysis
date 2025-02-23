@@ -1,6 +1,5 @@
 import logging
 import re
-
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -9,6 +8,7 @@ logger = logging.getLogger(__name__)
 def sanitize_column_name(column_name: str) -> str:
     """
     Sanitize a single column name by:
+      - Converting camel case to snake case
       - Converting to lowercase
       - Replacing spaces and special characters with underscores
       - Removing leading/trailing whitespace
@@ -17,6 +17,9 @@ def sanitize_column_name(column_name: str) -> str:
     :param column_name: Original column name
     :return: Sanitized column name
     """
+    # Convert camel case to snake case
+    column_name = re.sub(r"(?<!^)([A-Z])", r"_\1", column_name)
+
     # Convert to lowercase and strip whitespace
     column_name = column_name.lower().strip()
 
@@ -64,4 +67,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     # Example usage
-    clean_data("raw_data.csv", "cleaned_data.csv")
+    data = {
+        "CamelCaseColumn": [1, 2, 3],
+        "AnotherColumnName": [4, 5, 6],
+        "mixedCaseColumn": [7, 8, 9],
+        "Column With Spaces": [10, 11, 12],
+    }
+    df = pd.DataFrame(data)
+    cleaned_df = clean_data(df)
+    print(cleaned_df.columns)

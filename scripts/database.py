@@ -1,8 +1,9 @@
 import logging
 
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+
 from sqlalchemy.orm import sessionmaker, Session
 from scripts import load_config
 
@@ -56,22 +57,33 @@ def get_session() -> Session:
         raise
 
 
-def load_data_to_db(df: pd.DataFrame, table_name: str) -> None:
+
+
+def load_data_to_db(df: pd.DataFrame, table_name: str, primary_key: str = "id") -> None:
     """
     Load cleaned data from a Pandas DataFrame into a PostgreSQL database table.
 
     :param df: Pandas DataFrame containing the cleaned data.
-    :param db_config: Dictionary containing database connection details.
-    :param table_name: Name of the table to load data into (default: "acs2017_county_data").
+    :param table_name: Name of the table to load data into.
+    :param primary_key: Column name to be used as the primary key.
     :return: None
     :raises Exception: If any error occurs during the data loading process.
     """
     try:
         engine = create_db_engine()
+        with engine.connect() as conn:
+            conn.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    {primary_key} BIGINT PRIMARY KEY,
+                    {", ".join([f"{col} TEXT" for col in df.columns if col != primary_key])}
+                )
+            """))
+            conn.commit()  # Commit changes (only needed for direct SQL execution)
 
-        # Write the DataFrame to the database, replacing the table if it already exists
-        df.to_sql(table_name, engine, if_exists="replace", index=False)
+        # Append data while preserving the table structure
+        df.to_sql(table_name, engine, if_exists="append", index=False)
         logger.info(f"Data successfully loaded into table: {table_name}")
+
     except Exception as e:
         logger.error(f"Error in load_data_to_db: {e}")
         raise
