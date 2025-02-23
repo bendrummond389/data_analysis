@@ -1,6 +1,7 @@
-from typing import List, Type
+from typing import List, Type, Iterator
+import contextlib
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, URL
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeMeta
 from pathlib import Path
@@ -10,7 +11,7 @@ from src.config.paths import find_competition_root, find_nearest_config, find_pr
 from src.logging.setup import setup_logger  
 
 # Initialize a logger for database operations
-logger = setup_logger("database_manager", find_project_root() / "logs/database.log")
+_logger = setup_logger("database_manager_init", find_project_root() / "logs/database.log")
 
 class DatabaseManager:
     """Handles database connections, table creation, and data insertion."""
@@ -20,53 +21,70 @@ class DatabaseManager:
             start_path=context_path, config_name=config_name
         )
         self.config = self._load_config()
-
         self.db_config = self.config.get("db_config", {})
-        self.logging_config = self.config.get("logging_config", {})
+        self._configure_logger()
+        self.engine = self._create_engine()
+        self.SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=self.engine
+        )
 
-        relative_log_path = self.logging_config.get("log_path", "logs/database.log")
-        logger_name = self.logging_config.get("logger_name", "database.log")
+    def _configure_logger(self) -> None:
+        """Configure instance logger based on config settings."""
+        logging_config = self.config.get("logging_config", {})
+        relative_log_path = logging_config.get("log_path", "logs/database.log")
+        logger_name = logging_config.get("logger_name", "database_manager")
 
         log_path = find_competition_root(self.config_path) / relative_log_path
-
         self.logger = setup_logger(logger_name, log_path)
-        self.logger.info(f"Setting log path: {log_path}")
-
-        self.logger.info(f"Initialized DatabaseManager with config: {self.config_path}")
-
-        self.engine = self._create_engine()
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.logger.info(f"Logger configured with path: {log_path}")
 
     def _load_config(self) -> dict:
-        """Load database configuration."""
-        with open(self.config_path) as f:
-            config = yaml.safe_load(f)
-        logger.info(f"Loaded database config from {self.config_path}")
-        return config
+        """Load database configuration from YAML file."""
+        try:
+            with open(self.config_path) as f:
+                config = yaml.safe_load(f)
+            _logger.info(f"Loaded database config from {self.config_path}")
+            return config
+        except Exception as e:
+            _logger.exception(f"Error loading config: {e}")
+            raise
 
     def _create_engine(self):
         """Dynamically create a SQLAlchemy engine using extracted db_config."""
         required_keys = {"host", "port", "name", "user", "password"}
-        missing_keys = required_keys - self.db_config.keys()
-
-        if missing_keys:
-            self.logger.error(f"Missing required database config keys: {missing_keys}")
-            raise ValueError(f"Missing required config keys: {missing_keys}")
+        if missing := required_keys - self.db_config.keys():
+            self.logger.error(f"Missing required config keys: {missing}")
+            raise ValueError(f"Missing required config keys: {missing}")
 
         try:
-            engine = create_engine(
-                f"postgresql://{self.db_config['user']}:{self.db_config['password']}@"
-                f"{self.db_config['host']}:{self.db_config['port']}/{self.db_config['name']}"
+            url = URL.create(
+                drivername="postgresql",
+                username=self.db_config["user"],
+                password=self.db_config["password"],
+                host=self.db_config["host"],
+                port=self.db_config["port"],
+                database=self.db_config["name"],
             )
-            self.logger.info("Database engine successfully created")
+            engine = create_engine(url)
+            self.logger.info("Database engine created successfully")
             return engine
         except Exception as e:
-            self.logger.exception(f"Error creating database engine: {e}")
+            self.logger.exception(f"Engine creation failed: {e}")
             raise
 
-    def get_session(self) -> Session:
-        """Get a new database session."""
-        return self.SessionLocal()
+    @contextlib.contextmanager
+    def session_scope(self) -> Iterator[Session]:
+        """Context manager for transactional database sessions."""
+        session = self.SessionLocal()
+        try:
+            yield session
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            self.logger.exception(f"Session rollback due to error: {e}")
+            raise
+        finally:
+            session.close()
 
     def create_tables(self, models: List[Type[DeclarativeMeta]]) -> None:
         """Create database tables from ORM models."""
@@ -80,19 +98,14 @@ class DatabaseManager:
             raise
 
     def insert_dataframe(self, df: pd.DataFrame, model: Type[DeclarativeMeta]) -> None:
-        """Insert a pandas DataFrame into the database."""
-        session = self.get_session()
-        try:
-            records = [model(**row) for row in df.to_dict(orient="records")]
-            session.bulk_save_objects(records)
-            session.commit()
-            self.logger.info(f"Inserted {len(records)} records into {model.__tablename__}")
-        except SQLAlchemyError as e:
-            session.rollback()
-            self.logger.exception(f"Database error: {e}")
-            raise
-        finally:
-            session.close()
+        """Insert DataFrame records into the database using bulk insert."""
+        with self.session_scope() as session:
+            session.bulk_insert_mappings(
+                model, df.to_dict(orient="records")
+            )
+            self.logger.info(
+                f"Inserted {len(df)} records into {model.__tablename__}"
+            )
 
     def with_db_session(self, func):
         """Decorator to manage database sessions."""
