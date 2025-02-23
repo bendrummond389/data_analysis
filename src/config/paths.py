@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-def get_project_root(marker: str = "README.md", max_depth: int = 5) -> Path:
+def find_project_root(marker: str = "README.md", max_depth: int = 5) -> Path:
     """Find project root by looking for a marker file."""
     current_path = Path(__file__).resolve()
     for _ in range(max_depth):

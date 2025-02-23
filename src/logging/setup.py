@@ -2,11 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-# Define default log directory
-LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
-LOG_DIR.mkdir(exist_ok=True)  # Create logs directory if missing
-
-def setup_logger(name: str, log_file: str = "logs/database.log", level=logging.INFO) -> logging.Logger:
+def setup_logger(name: str, log_file: str = "logs/examples.log", level=logging.INFO) -> logging.Logger:
     """
     Creates and returns a logger with a given name and file.
     

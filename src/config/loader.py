@@ -2,7 +2,7 @@ from pathlib import Path
 import yaml
 from typing import Optional, Dict, Any
 
-from src.config.paths import get_project_root
+from src.config.paths import find_project_root
 
 
 def load_config(config_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -22,7 +22,7 @@ def load_config(config_path: Optional[Path] = None) -> Dict[str, Any]:
     try:
         # Default to project config if no path provided
         if config_path is None:
-            root = get_project_root()
+            root = find_project_root()
             config_path = root / "config/config.yaml"
         
         with config_path.open("r") as file:

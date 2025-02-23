@@ -1,0 +1,252 @@
+2025-02-23 11:30:34,732 - database_manager - INFO - Loaded database config from /Users/bendrummond/Projects/experimental/data_analysis/competitions/examples/config/database.yaml
+2025-02-23 11:30:34,734 - database_manager - INFO - Setting log path: /Users/bendrummond/Projects/experimental/data_analysis/competitions/examples/logs/examples.log
+2025-02-23 11:30:34,735 - database_manager - INFO - Initialized DatabaseManager with config: /Users/bendrummond/Projects/experimental/data_analysis/competitions/examples/config/database.yaml
+2025-02-23 11:30:34,818 - database_manager - INFO - Database engine successfully created
+2025-02-23 11:30:34,942 - database_manager - INFO - Tables created successfully
+2025-02-23 11:30:35,027 - database_manager - ERROR - Database error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "fips_pkey"
+DETAIL:  Key (fips_code)=(1001) already exists.
+
+[SQL: INSERT INTO fips (fips_code, state, county) VALUES (%(fips_code__0)s, %(state__0)s, %(county__0)s), (%(fips_code__1)s, %(state__1)s, %(county__1)s), (%(fips_code__2)s, %(state__2)s, %(county__2)s), (%(fips_code__3)s, %(state__3)s, %(county__3)s), (%( ... 54369 characters truncated ... code__998)s, %(state__998)s, %(county__998)s), (%(fips_code__999)s, %(state__999)s, %(county__999)s)]
+[parameters: {'county__0': 'Autauga County', 'state__0': 'Alabama', 'fips_code__0': 1001, 'county__1': 'Baldwin County', 'state__1': 'Alabama', 'fips_code__1': 1003, 'county__2': 'Barbour County', 'state__2': 'Alabama', 'fips_code__2': 1005, 'county__3': 'Bibb County', 'state__3': 'Alabama', 'fips_code__3': 1007, 'county__4': 'Blount County', 'state__4': 'Alabama', 'fips_code__4': 1009, 'county__5': 'Bullock County', 'state__5': 'Alabama', 'fips_code__5': 1011, 'county__6': 'Butler County', 'state__6': 'Alabama', 'fips_code__6': 1013, 'county__7': 'Calhoun County', 'state__7': 'Alabama', 'fips_code__7': 1015, 'county__8': 'Chambers County', 'state__8': 'Alabama', 'fips_code__8': 1017, 'county__9': 'Cherokee County', 'state__9': 'Alabama', 'fips_code__9': 1019, 'county__10': 'Chilton County', 'state__10': 'Alabama', 'fips_code__10': 1021, 'county__11': 'Choctaw County', 'state__11': 'Alabama', 'fips_code__11': 1023, 'county__12': 'Clarke County', 'state__12': 'Alabama', 'fips_code__12': 1025, 'county__13': 'Clay County', 'state__13': 'Alabama', 'fips_code__13': 1027, 'county__14': 'Cleburne County', 'state__14': 'Alabama', 'fips_code__14': 1029, 'county__15': 'Coffee County', 'state__15': 'Alabama', 'fips_code__15': 1031, 'county__16': 'Colbert County', 'state__16': 'Alabama' ... 2900 parameters truncated ... 'state__983': 'Kansas', 'fips_code__983': 20193, 'county__984': 'Trego County', 'state__984': 'Kansas', 'fips_code__984': 20195, 'county__985': 'Wabaunsee County', 'state__985': 'Kansas', 'fips_code__985': 20197, 'county__986': 'Wallace County', 'state__986': 'Kansas', 'fips_code__986': 20199, 'county__987': 'Washington County', 'state__987': 'Kansas', 'fips_code__987': 20201, 'county__988': 'Wichita County', 'state__988': 'Kansas', 'fips_code__988': 20203, 'county__989': 'Wilson County', 'state__989': 'Kansas', 'fips_code__989': 20205, 'county__990': 'Woodson County', 'state__990': 'Kansas', 'fips_code__990': 20207, 'county__991': 'Wyandotte County', 'state__991': 'Kansas', 'fips_code__991': 20209, 'county__992': 'Adair County', 'state__992': 'Kentucky', 'fips_code__992': 21001, 'county__993': 'Allen County', 'state__993': 'Kentucky', 'fips_code__993': 21003, 'county__994': 'Anderson County', 'state__994': 'Kentucky', 'fips_code__994': 21005, 'county__995': 'Ballard County', 'state__995': 'Kentucky', 'fips_code__995': 21007, 'county__996': 'Barren County', 'state__996': 'Kentucky', 'fips_code__996': 21009, 'county__997': 'Bath County', 'state__997': 'Kentucky', 'fips_code__997': 21011, 'county__998': 'Bell County', 'state__998': 'Kentucky', 'fips_code__998': 21013, 'county__999': 'Boone County', 'state__999': 'Kentucky', 'fips_code__999': 21015}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2115, in _exec_insertmany_context
+    dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 942, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "fips_pkey"
+DETAIL:  Key (fips_code)=(1001) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/bendrummond/Projects/experimental/data_analysis/src/database/manager.py", line 86, in insert_dataframe
+    session.bulk_save_objects(records)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4586, in bulk_save_objects
+    self._bulk_save_mappings(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<5 lines>...
+        render_nulls=False,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4763, in _bulk_save_mappings
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4752, in _bulk_save_mappings
+    bulk_persistence._bulk_insert(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<4 lines>...
+        render_nulls=render_nulls,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/bulk_persistence.py", line 222, in _bulk_insert
+    result = persistence._emit_insert_statements(
+        base_mapper,
+    ...<6 lines>...
+        execution_options=execution_options,
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py", line 1048, in _emit_insert_statements
+    result = connection.execute(
+        statement, multiparams, execution_options=execution_options
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 516, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1841, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2123, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e,
+        ^^
+    ...<4 lines>...
+        is_sub_exec=True,
+        ^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2352, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2115, in _exec_insertmany_context
+    dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 942, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "fips_pkey"
+DETAIL:  Key (fips_code)=(1001) already exists.
+
+[SQL: INSERT INTO fips (fips_code, state, county) VALUES (%(fips_code__0)s, %(state__0)s, %(county__0)s), (%(fips_code__1)s, %(state__1)s, %(county__1)s), (%(fips_code__2)s, %(state__2)s, %(county__2)s), (%(fips_code__3)s, %(state__3)s, %(county__3)s), (%( ... 54369 characters truncated ... code__998)s, %(state__998)s, %(county__998)s), (%(fips_code__999)s, %(state__999)s, %(county__999)s)]
+[parameters: {'county__0': 'Autauga County', 'state__0': 'Alabama', 'fips_code__0': 1001, 'county__1': 'Baldwin County', 'state__1': 'Alabama', 'fips_code__1': 1003, 'county__2': 'Barbour County', 'state__2': 'Alabama', 'fips_code__2': 1005, 'county__3': 'Bibb County', 'state__3': 'Alabama', 'fips_code__3': 1007, 'county__4': 'Blount County', 'state__4': 'Alabama', 'fips_code__4': 1009, 'county__5': 'Bullock County', 'state__5': 'Alabama', 'fips_code__5': 1011, 'county__6': 'Butler County', 'state__6': 'Alabama', 'fips_code__6': 1013, 'county__7': 'Calhoun County', 'state__7': 'Alabama', 'fips_code__7': 1015, 'county__8': 'Chambers County', 'state__8': 'Alabama', 'fips_code__8': 1017, 'county__9': 'Cherokee County', 'state__9': 'Alabama', 'fips_code__9': 1019, 'county__10': 'Chilton County', 'state__10': 'Alabama', 'fips_code__10': 1021, 'county__11': 'Choctaw County', 'state__11': 'Alabama', 'fips_code__11': 1023, 'county__12': 'Clarke County', 'state__12': 'Alabama', 'fips_code__12': 1025, 'county__13': 'Clay County', 'state__13': 'Alabama', 'fips_code__13': 1027, 'county__14': 'Cleburne County', 'state__14': 'Alabama', 'fips_code__14': 1029, 'county__15': 'Coffee County', 'state__15': 'Alabama', 'fips_code__15': 1031, 'county__16': 'Colbert County', 'state__16': 'Alabama' ... 2900 parameters truncated ... 'state__983': 'Kansas', 'fips_code__983': 20193, 'county__984': 'Trego County', 'state__984': 'Kansas', 'fips_code__984': 20195, 'county__985': 'Wabaunsee County', 'state__985': 'Kansas', 'fips_code__985': 20197, 'county__986': 'Wallace County', 'state__986': 'Kansas', 'fips_code__986': 20199, 'county__987': 'Washington County', 'state__987': 'Kansas', 'fips_code__987': 20201, 'county__988': 'Wichita County', 'state__988': 'Kansas', 'fips_code__988': 20203, 'county__989': 'Wilson County', 'state__989': 'Kansas', 'fips_code__989': 20205, 'county__990': 'Woodson County', 'state__990': 'Kansas', 'fips_code__990': 20207, 'county__991': 'Wyandotte County', 'state__991': 'Kansas', 'fips_code__991': 20209, 'county__992': 'Adair County', 'state__992': 'Kentucky', 'fips_code__992': 21001, 'county__993': 'Allen County', 'state__993': 'Kentucky', 'fips_code__993': 21003, 'county__994': 'Anderson County', 'state__994': 'Kentucky', 'fips_code__994': 21005, 'county__995': 'Ballard County', 'state__995': 'Kentucky', 'fips_code__995': 21007, 'county__996': 'Barren County', 'state__996': 'Kentucky', 'fips_code__996': 21009, 'county__997': 'Bath County', 'state__997': 'Kentucky', 'fips_code__997': 21011, 'county__998': 'Bell County', 'state__998': 'Kentucky', 'fips_code__998': 21013, 'county__999': 'Boone County', 'state__999': 'Kentucky', 'fips_code__999': 21015}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-02-23 11:30:35,036 - database_manager - ERROR - Transaction failed: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "fips_pkey"
+DETAIL:  Key (fips_code)=(1001) already exists.
+
+[SQL: INSERT INTO fips (fips_code, state, county) VALUES (%(fips_code__0)s, %(state__0)s, %(county__0)s), (%(fips_code__1)s, %(state__1)s, %(county__1)s), (%(fips_code__2)s, %(state__2)s, %(county__2)s), (%(fips_code__3)s, %(state__3)s, %(county__3)s), (%( ... 54369 characters truncated ... code__998)s, %(state__998)s, %(county__998)s), (%(fips_code__999)s, %(state__999)s, %(county__999)s)]
+[parameters: {'county__0': 'Autauga County', 'state__0': 'Alabama', 'fips_code__0': 1001, 'county__1': 'Baldwin County', 'state__1': 'Alabama', 'fips_code__1': 1003, 'county__2': 'Barbour County', 'state__2': 'Alabama', 'fips_code__2': 1005, 'county__3': 'Bibb County', 'state__3': 'Alabama', 'fips_code__3': 1007, 'county__4': 'Blount County', 'state__4': 'Alabama', 'fips_code__4': 1009, 'county__5': 'Bullock County', 'state__5': 'Alabama', 'fips_code__5': 1011, 'county__6': 'Butler County', 'state__6': 'Alabama', 'fips_code__6': 1013, 'county__7': 'Calhoun County', 'state__7': 'Alabama', 'fips_code__7': 1015, 'county__8': 'Chambers County', 'state__8': 'Alabama', 'fips_code__8': 1017, 'county__9': 'Cherokee County', 'state__9': 'Alabama', 'fips_code__9': 1019, 'county__10': 'Chilton County', 'state__10': 'Alabama', 'fips_code__10': 1021, 'county__11': 'Choctaw County', 'state__11': 'Alabama', 'fips_code__11': 1023, 'county__12': 'Clarke County', 'state__12': 'Alabama', 'fips_code__12': 1025, 'county__13': 'Clay County', 'state__13': 'Alabama', 'fips_code__13': 1027, 'county__14': 'Cleburne County', 'state__14': 'Alabama', 'fips_code__14': 1029, 'county__15': 'Coffee County', 'state__15': 'Alabama', 'fips_code__15': 1031, 'county__16': 'Colbert County', 'state__16': 'Alabama' ... 2900 parameters truncated ... 'state__983': 'Kansas', 'fips_code__983': 20193, 'county__984': 'Trego County', 'state__984': 'Kansas', 'fips_code__984': 20195, 'county__985': 'Wabaunsee County', 'state__985': 'Kansas', 'fips_code__985': 20197, 'county__986': 'Wallace County', 'state__986': 'Kansas', 'fips_code__986': 20199, 'county__987': 'Washington County', 'state__987': 'Kansas', 'fips_code__987': 20201, 'county__988': 'Wichita County', 'state__988': 'Kansas', 'fips_code__988': 20203, 'county__989': 'Wilson County', 'state__989': 'Kansas', 'fips_code__989': 20205, 'county__990': 'Woodson County', 'state__990': 'Kansas', 'fips_code__990': 20207, 'county__991': 'Wyandotte County', 'state__991': 'Kansas', 'fips_code__991': 20209, 'county__992': 'Adair County', 'state__992': 'Kentucky', 'fips_code__992': 21001, 'county__993': 'Allen County', 'state__993': 'Kentucky', 'fips_code__993': 21003, 'county__994': 'Anderson County', 'state__994': 'Kentucky', 'fips_code__994': 21005, 'county__995': 'Ballard County', 'state__995': 'Kentucky', 'fips_code__995': 21007, 'county__996': 'Barren County', 'state__996': 'Kentucky', 'fips_code__996': 21009, 'county__997': 'Bath County', 'state__997': 'Kentucky', 'fips_code__997': 21011, 'county__998': 'Bell County', 'state__998': 'Kentucky', 'fips_code__998': 21013, 'county__999': 'Boone County', 'state__999': 'Kentucky', 'fips_code__999': 21015}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2115, in _exec_insertmany_context
+    dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 942, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "fips_pkey"
+DETAIL:  Key (fips_code)=(1001) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/bendrummond/Projects/experimental/data_analysis/src/database/manager.py", line 101, in wrapper
+    result = func(session, *args, **kwargs)
+  File "/var/folders/39/nqqkj6s10jd_j9n51x1gfw_00000gn/T/ipykernel_68957/3987381255.py", line 43, in main_pipeline
+    db_manager.insert_dataframe(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        fips_data,
+        ^^^^^^^^^^
+        Fips
+        ^^^^
+    )
+    ^
+  File "/Users/bendrummond/Projects/experimental/data_analysis/src/database/manager.py", line 86, in insert_dataframe
+    session.bulk_save_objects(records)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4586, in bulk_save_objects
+    self._bulk_save_mappings(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<5 lines>...
+        render_nulls=False,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4763, in _bulk_save_mappings
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4752, in _bulk_save_mappings
+    bulk_persistence._bulk_insert(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<4 lines>...
+        render_nulls=render_nulls,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/bulk_persistence.py", line 222, in _bulk_insert
+    result = persistence._emit_insert_statements(
+        base_mapper,
+    ...<6 lines>...
+        execution_options=execution_options,
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py", line 1048, in _emit_insert_statements
+    result = connection.execute(
+        statement, multiparams, execution_options=execution_options
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 516, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1841, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2123, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e,
+        ^^
+    ...<4 lines>...
+        is_sub_exec=True,
+        ^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2352, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2115, in _exec_insertmany_context
+    dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/bendrummond/.local/share/virtualenvs/data_analysis-R7KTjjXf/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 942, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "fips_pkey"
+DETAIL:  Key (fips_code)=(1001) already exists.
+
+[SQL: INSERT INTO fips (fips_code, state, county) VALUES (%(fips_code__0)s, %(state__0)s, %(county__0)s), (%(fips_code__1)s, %(state__1)s, %(county__1)s), (%(fips_code__2)s, %(state__2)s, %(county__2)s), (%(fips_code__3)s, %(state__3)s, %(county__3)s), (%( ... 54369 characters truncated ... code__998)s, %(state__998)s, %(county__998)s), (%(fips_code__999)s, %(state__999)s, %(county__999)s)]
+[parameters: {'county__0': 'Autauga County', 'state__0': 'Alabama', 'fips_code__0': 1001, 'county__1': 'Baldwin County', 'state__1': 'Alabama', 'fips_code__1': 1003, 'county__2': 'Barbour County', 'state__2': 'Alabama', 'fips_code__2': 1005, 'county__3': 'Bibb County', 'state__3': 'Alabama', 'fips_code__3': 1007, 'county__4': 'Blount County', 'state__4': 'Alabama', 'fips_code__4': 1009, 'county__5': 'Bullock County', 'state__5': 'Alabama', 'fips_code__5': 1011, 'county__6': 'Butler County', 'state__6': 'Alabama', 'fips_code__6': 1013, 'county__7': 'Calhoun County', 'state__7': 'Alabama', 'fips_code__7': 1015, 'county__8': 'Chambers County', 'state__8': 'Alabama', 'fips_code__8': 1017, 'county__9': 'Cherokee County', 'state__9': 'Alabama', 'fips_code__9': 1019, 'county__10': 'Chilton County', 'state__10': 'Alabama', 'fips_code__10': 1021, 'county__11': 'Choctaw County', 'state__11': 'Alabama', 'fips_code__11': 1023, 'county__12': 'Clarke County', 'state__12': 'Alabama', 'fips_code__12': 1025, 'county__13': 'Clay County', 'state__13': 'Alabama', 'fips_code__13': 1027, 'county__14': 'Cleburne County', 'state__14': 'Alabama', 'fips_code__14': 1029, 'county__15': 'Coffee County', 'state__15': 'Alabama', 'fips_code__15': 1031, 'county__16': 'Colbert County', 'state__16': 'Alabama' ... 2900 parameters truncated ... 'state__983': 'Kansas', 'fips_code__983': 20193, 'county__984': 'Trego County', 'state__984': 'Kansas', 'fips_code__984': 20195, 'county__985': 'Wabaunsee County', 'state__985': 'Kansas', 'fips_code__985': 20197, 'county__986': 'Wallace County', 'state__986': 'Kansas', 'fips_code__986': 20199, 'county__987': 'Washington County', 'state__987': 'Kansas', 'fips_code__987': 20201, 'county__988': 'Wichita County', 'state__988': 'Kansas', 'fips_code__988': 20203, 'county__989': 'Wilson County', 'state__989': 'Kansas', 'fips_code__989': 20205, 'county__990': 'Woodson County', 'state__990': 'Kansas', 'fips_code__990': 20207, 'county__991': 'Wyandotte County', 'state__991': 'Kansas', 'fips_code__991': 20209, 'county__992': 'Adair County', 'state__992': 'Kentucky', 'fips_code__992': 21001, 'county__993': 'Allen County', 'state__993': 'Kentucky', 'fips_code__993': 21003, 'county__994': 'Anderson County', 'state__994': 'Kentucky', 'fips_code__994': 21005, 'county__995': 'Ballard County', 'state__995': 'Kentucky', 'fips_code__995': 21007, 'county__996': 'Barren County', 'state__996': 'Kentucky', 'fips_code__996': 21009, 'county__997': 'Bath County', 'state__997': 'Kentucky', 'fips_code__997': 21011, 'county__998': 'Bell County', 'state__998': 'Kentucky', 'fips_code__998': 21013, 'county__999': 'Boone County', 'state__999': 'Kentucky', 'fips_code__999': 21015}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

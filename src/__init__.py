@@ -2,7 +2,7 @@ from .config import (
     load_config,
     find_nearest_config,
     create_symlink,
-    get_project_root,
+    find_project_root,
     find_competition_root,
 )
 from .data import clean_data
@@ -16,6 +16,6 @@ __all__ = [
     "create_symlink",
     "clean_data",
     "Base",
-    "get_project_root",
+    "find_project_root",
     "find_competition_root",
 ]

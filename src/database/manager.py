@@ -6,11 +6,11 @@ from sqlalchemy.orm import sessionmaker, Session, DeclarativeMeta
 from pathlib import Path
 import yaml
 
-from src.config.paths import find_competition_root, find_nearest_config
-from src.logging.setup import setup_logger  # Import the logger setup
+from src.config.paths import find_competition_root, find_nearest_config, find_project_root
+from src.logging.setup import setup_logger  
 
 # Initialize a logger for database operations
-logger = setup_logger("database_manager", "database.log")
+logger = setup_logger("database_manager", find_project_root() / "logs/database.log")
 
 class DatabaseManager:
     """Handles database connections, table creation, and data insertion."""
@@ -27,7 +27,9 @@ class DatabaseManager:
         relative_log_path = self.logging_config.get("log_path", "logs/database.log")
 
         log_path = find_competition_root(self.config_path) / relative_log_path
+
         self.logger = setup_logger("database_manager", log_path)
+        self.logger.info(f"Setting log path: {log_path}")
 
         self.logger.info(f"Initialized DatabaseManager with config: {self.config_path}")
 
