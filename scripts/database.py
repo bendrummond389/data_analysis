@@ -1,10 +1,13 @@
 import logging
+from typing import List, Type
+
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SQLAlchemyError
 
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, DeclarativeMeta
 from scripts import load_config
 
 # Configure logging
@@ -56,34 +59,48 @@ def get_session() -> Session:
         logger.error(f"Failed to create database session: {e}")
         raise
 
-
-
-
-def load_data_to_db(df: pd.DataFrame, table_name: str, primary_key: str = "id") -> None:
-    """
-    Load cleaned data from a Pandas DataFrame into a PostgreSQL database table.
-
-    :param df: Pandas DataFrame containing the cleaned data.
-    :param table_name: Name of the table to load data into.
-    :param primary_key: Column name to be used as the primary key.
-    :return: None
-    :raises Exception: If any error occurs during the data loading process.
-    """
+def create_tables(session: Session, models: List[Type[DeclarativeMeta]]) -> None:
+    """Create database tables from ORM models if they don't exist"""
     try:
-        engine = create_db_engine()
-        with engine.connect() as conn:
-            conn.execute(text(f"""
-                CREATE TABLE IF NOT EXISTS {table_name} (
-                    {primary_key} BIGINT PRIMARY KEY,
-                    {", ".join([f"{col} TEXT" for col in df.columns if col != primary_key])}
-                )
-            """))
-            conn.commit()  # Commit changes (only needed for direct SQL execution)
-
-        # Append data while preserving the table structure
-        df.to_sql(table_name, engine, if_exists="append", index=False)
-        logger.info(f"Data successfully loaded into table: {table_name}")
-
-    except Exception as e:
-        logger.error(f"Error in load_data_to_db: {e}")
+        for model in models:
+            if hasattr(model, '__table__'):
+                model.__table__.create(bind=session.get_bind(), checkfirst=True)
+        logger.info("Tables created/verified successfully")
+    except SQLAlchemyError as e:
+        logger.error(f"Error creating tables: {e}")
         raise
+
+def insert_dataframe(session: Session, df: pd.DataFrame, model: Type[DeclarativeMeta]) -> None:
+    """Insert DataFrame data into database using SQLAlchemy ORM"""
+    try:
+        # Convert DataFrame to list of model instances
+        records = [model(**row) for row in df.to_dict(orient='records')]
+        
+        # Bulk insert with return_defaults=False for better performance
+        session.bulk_save_objects(records, return_defaults=False)
+        session.commit()
+        logger.info(f"Successfully inserted {len(records)} records into {model.__tablename__}")
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"Error inserting data: {e}")
+        raise
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Unexpected error: {e}")
+        raise
+
+def with_db_session(func):
+    """Decorator for managing database session lifecycle"""
+    def wrapper(*args, **kwargs):
+        session = get_session()
+        try:
+            result = func(session, *args, **kwargs)
+            session.commit()
+            return result
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Transaction rolled back: {e}")
+            raise
+        finally:
+            session.close()
+    return wrapper
