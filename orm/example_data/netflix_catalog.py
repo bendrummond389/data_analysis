@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, BigInteger, Text
 from sqlalchemy.ext.declarative import declarative_base
-from orm_models.base import Base
+from orm.base import Base
 
 
 class NetflixDataset(Base):

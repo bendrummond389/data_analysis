@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String
-from .base import Base
+from ..base import Base
 
 
 class Fips(Base):

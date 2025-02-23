@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, Float, ForeignKey
-from .base import Base
+from ..base import Base
 
 
 class MortalityRate2014(Base):
