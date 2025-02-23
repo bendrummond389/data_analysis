@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def setup_logger(
-    name: str, log_file: str, level=logging.INFO
+    name: str, log_file_path: str, level=logging.INFO
 ) -> logging.Logger:
     """
     Creates and returns a logger with a given name and file.
@@ -17,7 +17,7 @@ def setup_logger(
     Returns:
         logging.Logger: Configured logger instance.
     """
-    log_path = Path(log_file)
+    log_path = Path(log_file_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure log directory exists
 
     logger = logging.getLogger(name)

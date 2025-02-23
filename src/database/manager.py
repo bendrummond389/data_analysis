@@ -33,9 +33,9 @@ class DatabaseManager:
 
     def _configure_logger(self) -> None:
         """Configure instance logger based on config settings."""
-        logging_config = self.config.get("logging_config", {})
-        relative_log_path = logging_config.get("log_path", "logs/database.log")
-        logger_name = logging_config.get("logger_name", "database_manager")
+        logging_config = self.config.get("logging", {})
+        relative_log_path = logging_config.get("path", "logs/database.log")
+        logger_name = logging_config.get("name", "database_manager")
 
         # Find project root based on config location or current directory
         start_path = self.config_path.parent if self.config_path else Path.cwd()
