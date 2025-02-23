@@ -1,6 +1,5 @@
 from .config import (
     load_config,
-    setup_logging,
     find_nearest_config,
     create_symlink,
     get_project_root,
@@ -12,7 +11,6 @@ from .models import Base
 
 __all__ = [
     "load_config",
-    "setup_logging",
     "DatabaseManager",
     "find_nearest_config",
     "create_symlink",

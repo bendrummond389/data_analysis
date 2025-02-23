@@ -1,5 +1,4 @@
 from pathlib import Path
-import logging
 import yaml
 from typing import Optional, Dict, Any
 
@@ -30,23 +29,9 @@ def load_config(config_path: Optional[Path] = None) -> Dict[str, Any]:
             return yaml.safe_load(file)
             
     except FileNotFoundError:
-        logging.error(f"Config file not found: {config_path}")
+        
         raise
     except yaml.YAMLError as e:
-        logging.error(f"Invalid YAML in config file: {e}")
+
         raise
 
-
-def setup_logging(log_path):
-    """Sets up logging with the specified log file path."""
-    log_format = "%(asctime)s - %(levelname)s - %(message)s"
-
-    # Configure file logging
-    logging.basicConfig(filename=log_path, level=logging.INFO, format=log_format)
-
-    # Configure console logging
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(logging.Formatter(log_format))
-
-    logging.getLogger().addHandler(console_handler)

@@ -1,10 +1,7 @@
-import logging
+
 import re
 import pandas as pd
 from typing import Dict, Any
-
-
-logger = logging.getLogger(__name__)
 
 
 def sanitize_column_name(column_name: str) -> str:
@@ -53,10 +50,7 @@ def clean_data(df: pd.DataFrame, cleaning_config: Dict[str, Any]) -> pd.DataFram
         # Additional cleaning steps
         if cleaning_config.get("strip_strings", True):
             df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
-        
-        logger.info(f"Data cleaned. Shape: {df.shape}")
         return df
         
     except Exception as e:
-        logger.error(f"Data cleaning failed: {e}")
         raise
