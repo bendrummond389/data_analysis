@@ -52,7 +52,7 @@ def clean_data(df: pd.DataFrame, cleaning_config: Dict[str, Any]) -> pd.DataFram
         
         # Additional cleaning steps
         if cleaning_config.get("strip_strings", True):
-            df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+            df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
         
         logger.info(f"Data cleaned. Shape: {df.shape}")
         return df
