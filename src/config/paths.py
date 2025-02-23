@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 def get_project_root(marker: str = "README.md", max_depth: int = 5) -> Path:
     """Find project root by looking for a marker file."""
@@ -80,3 +80,50 @@ def create_symlink(source: Path, target: Path):
     # Create the symlink
     target.symlink_to(source, target_is_directory=source.is_dir())
     print(f"Symlink created: {target} -> {source}")
+
+def find_competition_root(
+    start_path: Optional[Path] = None,
+    search_depth: int = 5,
+) -> Path:
+    """
+    Search upward from start_path to find the root of a competition directory.
+    
+    This function assumes:
+    1. Each competition subdirectory sits directly under 'competitions/'.
+    2. That subdirectory typically has 'config', 'data', 'db', and 'notebooks'.
+    
+    You can customize 'required_dirs' or the logic below to match your needs.
+    
+    Args:
+        start_path (Path, optional): Directory to start searching from.
+                                     Defaults to the caller's location.
+        search_depth (int): Maximum number of levels to climb.
+        required_dirs (List[str], optional): List of directory names that must
+                                             exist for us to consider this path
+                                             a valid competition root.
+    
+    Returns:
+        Path: Path to the discovered competition root directory.
+    
+    Raises:
+        FileNotFoundError: If no competition root is found within search_depth.
+    """
+    if start_path is None:
+        # Default to caller's directory
+        import inspect
+        frame = inspect.stack()[1]
+        start_path = Path(frame.filename).parent.resolve()
+    
+    current_path = start_path
+    
+    for _ in range(search_depth):
+        # Check if the parent folder is 'competitions' 
+        if current_path.parent.name == "competitions":
+            return current_path.resolve()
+
+        # Climb up one level
+        current_path = current_path.parent
+    
+    raise FileNotFoundError(
+        f"No competition root found within {search_depth} levels starting from {start_path}"
+    )
